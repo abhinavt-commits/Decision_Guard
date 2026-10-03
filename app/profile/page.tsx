@@ -7,6 +7,7 @@ import { AppPage, inr, LangToggle, useToast } from "@/components/app-shell";
 import { STOCKS, findStock } from "@/lib/stocks";
 import { parseTradebook, SAMPLE_CSV } from "@/lib/client/csv";
 import { HELP_LINKS } from "@/lib/glossary";
+import { IoAdd, IoCallOutline, IoChevronForward, IoCloudUploadOutline, IoLogOutOutline, IoPersonCircleOutline, IoTrashOutline } from "react-icons/io5";
 
 export default function Profile() {
   const { t, b, me, trades, myTrades, addTrades, removeTrade, logout, features } = useApp();
@@ -27,28 +28,31 @@ export default function Profile() {
     <AppPage>
       <h1>{t("profile_title")}</h1>
       {me && (
-        <section className="card">
-          <h3>{b(me.displayName)}</h3>
-          {me.kind === "user" && <p style={{ margin: "0 0 6px" }}>{t("your_login_id")}: <b style={{ color: "var(--blue)" }}>{me.username}</b></p>}
-          <p className="small muted" style={{ margin: 0 }}>{me.city ? me.city + " · " : ""}{b(me.story)}</p>
+        <section className="card" style={{ display: "flex", gap: 14, alignItems: "flex-start", marginTop: 16 }}>
+          <span className="ibadge" style={{ width: 48, height: 48, borderRadius: 16 }}><IoPersonCircleOutline style={{ width: 26, height: 26 }} /></span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{ fontSize: 18 }}>{b(me.displayName)}</h3>
+            {me.kind === "user" && <p style={{ margin: "0 0 6px" }}>{t("your_login_id")}: <b style={{ color: "var(--blue)" }}>{me.username}</b></p>}
+            <p className="small muted" style={{ margin: 0 }}>{me.city ? me.city + " · " : ""}{b(me.story)}</p>
+          </div>
         </section>
       )}
-      <div className="grid3" style={{ marginBottom: 12 }}>
-        <div className="card stat" style={{ marginBottom: 0 }}><b>{trades.length}</b><span className="small">{t("total_trades")}</span></div>
-        <div className="card stat" style={{ marginBottom: 0 }}><b style={{ fontSize: 22 }}>{inr(median)}</b><span className="small">{t("usual_trade")}</span></div>
-        <div className="card stat" style={{ marginBottom: 0 }}><b>{last7}</b><span className="small">{t("trades_7d")}</span></div>
+      <div className="stats">
+        <div><b>{trades.length}</b><span>{t("total_trades")}</span></div>
+        <div><b style={{ fontSize: 20, lineHeight: "30px" }}>{inr(median)}</b><span>{t("usual_trade")}</span></div>
+        <div><b>{last7}</b><span>{t("trades_7d")}</span></div>
       </div>
 
-      <section className="card">
-        <h3>{t("language")}</h3>
+      <section className="panel" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <b style={{ fontWeight: 650 }}>{t("language")}</b>
         <LangToggle />
       </section>
 
       <h2>{t("my_trades")}</h2>
       <p className="small muted">{t("my_trades_sub")}</p>
       <div className="row" style={{ marginBottom: 10 }}>
-        <button className="btn btn-outline btn-sm" style={{ width: "100%" }} onClick={() => setAdding((x) => !x)}>+ {t("add_trade")}</button>
-        <button className="btn btn-outline btn-sm" style={{ width: "100%" }} onClick={() => fileRef.current?.click()}>{t("import_csv")}</button>
+        <button className="btn btn-outline btn-sm" style={{ width: "100%" }} onClick={() => setAdding((x) => !x)}><IoAdd /> {t("add_trade")}</button>
+        <button className="btn btn-outline btn-sm" style={{ width: "100%" }} onClick={() => fileRef.current?.click()}><IoCloudUploadOutline /> {t("import_csv")}</button>
       </div>
       {/* Broad "accept" list: Android often labels CSV files as Excel or plain text. */}
       <input ref={fileRef} type="file" accept=".csv,.txt,text/csv,text/comma-separated-values,text/plain,application/csv,application/vnd.ms-excel" hidden onChange={async (e) => {
@@ -105,7 +109,7 @@ export default function Profile() {
         </form>
       )}
 
-      <section className="card" style={{ paddingTop: 4, paddingBottom: 4 }}>
+      <section className="card" style={{ paddingTop: 2, paddingBottom: 2 }}>
         {sorted.slice(0, 25).map((x) => {
           const st = findStock(x.symbol);
           return (
@@ -117,7 +121,7 @@ export default function Profile() {
               {x.pnl !== null ? (
                 <b style={{ color: x.pnl >= 0 ? "var(--green)" : "var(--red)" }}>{x.pnl >= 0 ? "+" : "−"}{inr(Math.abs(x.pnl))}</b>
               ) : <span className="pill pill-gray">{t("buy")}</span>}
-              {mine.has(x.id) && <button className="linkbtn" aria-label={t("delete")} onClick={() => removeTrade(x.id)}>✕</button>}
+              {mine.has(x.id) && <button className="linkbtn" aria-label={t("delete")} onClick={() => removeTrade(x.id)} style={{ color: "var(--ink-3)" }}><IoTrashOutline /></button>}
             </div>
           );
         })}
@@ -130,15 +134,17 @@ export default function Profile() {
       </p>
 
       <h2>{t("help_title")}</h2>
-      <div className="card" style={{ paddingTop: 4, paddingBottom: 4 }}>
+      <div className="card" style={{ paddingTop: 2, paddingBottom: 2 }}>
         {HELP_LINKS.map((h) => (
           <a key={h.href} className="list-item" href={h.href} target={h.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">
-            <span style={{ flex: 1, fontWeight: 700, color: "var(--blue)" }}>{b(h.label)}</span>
+            <span className="ibadge" style={{ width: 34, height: 34, borderRadius: 10 }}><IoCallOutline /></span>
+            <span style={{ flex: 1, fontWeight: 650, color: "var(--ink)" }}>{b(h.label)}</span>
+            <IoChevronForward className="chev" aria-hidden />
           </a>
         ))}
       </div>
 
-      <button className="btn btn-outline" style={{ marginTop: 12 }} onClick={async () => { await logout(); router.replace("/login"); }}>{t("logout")}</button>
+      <button className="btn btn-outline" style={{ marginTop: 16, color: "var(--red)" }} onClick={async () => { await logout(); router.replace("/login"); }}><IoLogOutOutline style={{ color: "var(--red)" }} /> {t("logout")}</button>
       {toast.node}
     </AppPage>
   );

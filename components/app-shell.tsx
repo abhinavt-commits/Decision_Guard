@@ -7,8 +7,7 @@ import { useApp } from "@/lib/app-state";
 import { APP_NAME, APP_SHORT } from "@/lib/ui-strings";
 import { findTerm } from "@/lib/glossary";
 import { IconShield } from "./icons";
-import { IoBookOutline, IoChatbubbleEllipsesOutline, IoHomeOutline, IoPersonOutline, IoTimeOutline } from "react-icons/io5";
-import GradientMenu, { type GradientMenuItem } from "./ui/gradient-menu";
+import { IoBook, IoBookOutline, IoChatbubbleEllipses, IoChatbubbleEllipsesOutline, IoHome, IoHomeOutline, IoPerson, IoPersonOutline, IoTime, IoTimeOutline } from "react-icons/io5";
 
 export function LangToggle() {
   const { lang, setLang } = useApp();
@@ -39,16 +38,26 @@ export function BottomNav() {
   const path = usePathname() ?? "";
   // Pages without their own tab highlight the closest one.
   const activeHref = path.startsWith("/check") ? "/home" : path.startsWith("/result") || path.startsWith("/journal") ? "/history" : path;
-  const items: GradientMenuItem[] = [
-    { href: "/home", title: t("nav_home"), icon: <IoHomeOutline /> },
-    { href: "/history", title: t("nav_history"), icon: <IoTimeOutline /> },
-    { href: "/ask", title: t("nav_ask"), icon: <IoChatbubbleEllipsesOutline /> },
-    { href: "/learn", title: t("nav_learn"), icon: <IoBookOutline /> },
-    { href: "/profile", title: t("nav_profile"), icon: <IoPersonOutline /> },
+  const items = [
+    { href: "/home", title: t("nav_home"), icon: <IoHomeOutline />, on: <IoHome /> },
+    { href: "/history", title: t("nav_history"), icon: <IoTimeOutline />, on: <IoTime /> },
+    { href: "/ask", title: t("nav_ask"), icon: <IoChatbubbleEllipsesOutline />, on: <IoChatbubbleEllipses /> },
+    { href: "/learn", title: t("nav_learn"), icon: <IoBookOutline />, on: <IoBook /> },
+    { href: "/profile", title: t("nav_profile"), icon: <IoPersonOutline />, on: <IoPerson /> },
   ];
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--line)] bg-white/95 backdrop-blur pt-2.5 pb-[calc(10px+env(safe-area-inset-bottom))]">
-      <GradientMenu items={items} activeHref={activeHref} size="sm" ariaLabel="Main" />
+    <div className="dock-wrap">
+      <nav className="dock" aria-label="Main">
+        {items.map((it) => {
+          const active = activeHref === it.href || activeHref.startsWith(it.href + "/");
+          return (
+            <Link key={it.href} href={it.href} aria-current={active ? "page" : undefined}>
+              <span className="ic" aria-hidden>{active ? it.on : it.icon}</span>
+              <span>{it.title}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
@@ -86,8 +95,9 @@ export function TermProvider({ children }: { children: React.ReactNode }) {
         <div className="sheet-backdrop" onClick={() => setOpen(null)} role="dialog" aria-modal="true" aria-label={b(term.word)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="grab" />
-            <h2 style={{ marginTop: 0 }}>{b(term.word)}</h2>
-            <p style={{ fontSize: 19 }}>{b(term.simple)}</p>
+            <p className="eyebrow">{t("explain_term")}</p>
+            <h2 style={{ marginTop: 0, fontSize: 22 }}>{b(term.word)}</h2>
+            <p style={{ fontSize: 18, color: "var(--ink)" }}>{b(term.simple)}</p>
             {term.example && <p className="alert alert-info">{b(term.example)}</p>}
             <button className="btn btn-outline" onClick={() => setOpen(null)} style={{ marginTop: 10 }}>{t("close")}</button>
           </div>
@@ -105,7 +115,7 @@ export function Term({ id, children }: { id: string; children?: React.ReactNode 
   const term = findTerm(id);
   if (!term) return <>{children}</>;
   return (
-    <button type="button" className="linkbtn term" onClick={() => openTerm(id)} style={{ textDecoration: "none" }}>
+    <button type="button" className="linkbtn term" onClick={() => openTerm(id)}>
       {children ?? b(term.word)}
     </button>
   );

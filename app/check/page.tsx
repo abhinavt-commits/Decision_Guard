@@ -10,6 +10,7 @@ import { searchStocks, findStock, STOCKS } from "@/lib/stocks";
 import type { StockHit } from "@/lib/stock-universe";
 import type { CheckResult, ReasonChip, SourceType } from "@/lib/types";
 import type { UIKey } from "@/lib/ui-strings";
+import { IoClose, IoFilmOutline } from "react-icons/io5";
 import { IconCamera, IconChat, IconDots, IconInsta, IconMic, IconNews, IconPhone, IconSend, IconStar, IconUsers, IconYoutube } from "@/components/icons";
 
 const SOURCES: { id: SourceType; icon: React.ReactNode }[] = [
@@ -193,7 +194,7 @@ function CheckForm() {
         <div className="spinner" />
         <h2>{t("checking")}</h2>
         <p className="muted">{t("checking_steps")}</p>
-        {/youtu\.?be/i.test(url) && <p className="alert alert-info small">🎬 {t("checking_video")}</p>}
+        {/youtu\.?be/i.test(url) && <p className="alert alert-info small"><IoFilmOutline /><span>{t("checking_video")}</span></p>}
       </div>
     );
   }
@@ -288,25 +289,25 @@ function CheckForm() {
           </div>
           <label className="label" htmlFor="q">{t("which_share")}</label>
           {sel ? (
-            <div className="card flat" style={{ display: "flex", alignItems: "center", gap: 10, borderColor: "var(--blue)" }}>
+            <div className="card" style={{ display: "flex", alignItems: "center", gap: 10, borderColor: "#b9cbfa", boxShadow: "0 0 0 3px var(--blue-ring)" }}>
               <div style={{ flex: 1 }}>
                 <b>{b(sel.name)}</b>
                 <div className="small muted">{sel.symbol} · {curatedSel ? b(curatedSel.about) : sel.exchange}{sel.sme ? " · SME" : ""}</div>
               </div>
-              <button type="button" className="linkbtn" onClick={() => { setSymbol(null); setPicked(null); setAmount(""); setAmountAuto(false); }}>✕</button>
+              <button type="button" className="linkbtn" aria-label={t("back")} onClick={() => { setSymbol(null); setPicked(null); setAmount(""); setAmountAuto(false); }}><IoClose style={{ width: 22, height: 22 }} /></button>
             </div>
           ) : symbol === "OTHER" ? (
             <>
               <input className="input" placeholder={t("other_company_name")} value={otherName} onChange={(e) => setOther(e.target.value)} />
-              <button type="button" className="linkbtn" onClick={() => setSymbol(null)}>✕ {t("search_company")}</button>
+              <button type="button" className="linkbtn" onClick={() => setSymbol(null)}><IoClose /> {t("search_company")}</button>
             </>
           ) : (
             <>
               <input id="q" className="input" placeholder={t("search_company_all")} value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
-              <div className="card flat" style={{ padding: "4px 12px", marginTop: 8, maxHeight: 300, overflow: "auto" }}>
+              <div className="card" style={{ padding: "4px 14px", marginTop: 10, maxHeight: 300, overflow: "auto" }}>
                 {!q.trim() && <p className="small muted" style={{ margin: "8px 0 2px" }}>{t("popular_stocks")}</p>}
                 {hits.map((s) => (
-                  <button key={s.symbol} type="button" className="list-item" style={{ width: "100%", background: "none", border: 0, borderBottom: "1px solid var(--line)", textAlign: "left", cursor: "pointer" }}
+                  <button key={s.symbol} type="button" className="list-item" style={{ width: "100%", background: "none", border: 0, borderBottom: "1px solid var(--line-soft)", textAlign: "left", cursor: "pointer" }}
                     onClick={() => { setSymbol(s.symbol); setPicked(s); setAmount(""); setAmountAuto(false); }}>
                     <span style={{ flex: 1 }}>
                       <b>{b(s.name)}</b>

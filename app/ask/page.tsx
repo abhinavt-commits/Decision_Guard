@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { lsGet, lsSet, useApp } from "@/lib/app-state";
 import { AppPage, useTerm } from "@/components/app-shell";
 import { IconMic, IconSend, IconSpeaker } from "@/components/icons";
-import { speak, speechSupported, stopSpeaking, useVoiceInput } from "@/lib/client/voice";
+import { speak, speechSupported, stopSpeaking, useCanSpeak, useVoiceInput } from "@/lib/client/voice";
+import { IoChatbubbleEllipsesOutline, IoLockClosedOutline, IoSparklesOutline } from "react-icons/io5";
 import { FAQ } from "@/lib/chat";
 import type { Bi } from "@/lib/types";
 
@@ -36,6 +37,7 @@ export default function Ask() {
   const [busy, setBusy] = useState(false);
   const [voiceOk, setVoiceOk] = useState(false);
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
+  const canSpeak = useCanSpeak(lang);
   const endRef = useRef<HTMLDivElement>(null);
   const voice = useVoiceInput(lang, (v) => setText((x) => (x ? x + " " : "") + v));
 
@@ -77,15 +79,18 @@ export default function Ask() {
 
   return (
     <AppPage>
-      <h1 style={{ marginBottom: 4 }}>💬 {t("ask_title")}</h1>
-      <p className="small muted" style={{ marginTop: 0 }}>{t("ask_sub")}</p>
-      <p className="alert alert-info small">{t("ask_rule")}</p>
+      <h1 className="h-icon" style={{ marginBottom: 4 }}><IoChatbubbleEllipsesOutline style={{ width: 26, height: 26 }} /> {t("ask_title")}</h1>
+      <p className="page-sub" style={{ marginBottom: 14 }}>{t("ask_sub")}</p>
+      <p className="alert alert-info small"><IoLockClosedOutline /><span>{t("ask_rule")}</span></p>
 
       <div aria-live="polite">
         {msgs.length === 0 && (
-          <div className="card flat">
-            <p style={{ marginTop: 0 }}><b>{t("ask_hello")}</b></p>
+          <div className="card" style={{ display: "flex", gap: 12 }}>
+            <span className="ibadge"><IoSparklesOutline /></span>
+            <div>
+            <p style={{ marginTop: 0, marginBottom: 4 }}><b>{t("ask_hello")}</b></p>
             <p className="small muted" style={{ marginBottom: 0 }}>{t("ask_try")}</p>
+            </div>
           </div>
         )}
         {msgs.map((m, i) => (
@@ -95,12 +100,12 @@ export default function Ask() {
                 maxWidth: "88%",
                 background: m.role === "user" ? "var(--blue)" : "#fff",
                 color: m.role === "user" ? "#fff" : "var(--ink)",
-                border: m.role === "user" ? 0 : `1px solid ${m.refused ? "var(--orange-line)" : "var(--line)"}`,
-                borderRadius: m.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-                padding: "10px 14px",
-                boxShadow: "var(--shadow)",
+                border: m.role === "user" ? 0 : `1px solid ${m.refused ? "var(--orange-line)" : "rgba(226,232,240,.9)"}`,
+                borderRadius: m.role === "user" ? "20px 20px 6px 20px" : "20px 20px 20px 6px",
+                padding: "12px 16px",
+                boxShadow: m.role === "user" ? "var(--shadow-brand)" : "var(--shadow)",
                 whiteSpace: "pre-wrap",
-                fontSize: 17,
+                fontSize: 16.5,
               }}
             >
               {m.text}
@@ -110,12 +115,14 @@ export default function Ask() {
                     <Link className="btn btn-primary btn-sm" href={ACTIONS[m.action].href} style={{ minHeight: 40 }}>{ACTIONS[m.action].label}</Link>
                   )}
                   {m.term && <button className="linkbtn" onClick={() => openTerm(m.term!)}>{t("explain_term")}</button>}
-                  <button className="linkbtn" aria-label={t("read_aloud")} onClick={() => {
-                    if (speakingIdx === i) { stopSpeaking(); setSpeakingIdx(null); return; }
-                    if (speak(m.text, lang, () => setSpeakingIdx(null))) setSpeakingIdx(i);
-                  }}>
-                    <IconSpeaker size={16} /> {speakingIdx === i ? t("stop_reading") : t("read_aloud")}
-                  </button>
+                  {canSpeak && (
+                    <button className="linkbtn" aria-label={t("read_aloud")} onClick={() => {
+                      if (speakingIdx === i) { stopSpeaking(); setSpeakingIdx(null); return; }
+                      if (speak(m.text, lang, () => setSpeakingIdx(null))) setSpeakingIdx(i);
+                    }}>
+                      <IconSpeaker size={16} /> {speakingIdx === i ? t("stop_reading") : t("read_aloud")}
+                    </button>
+                  )}
                   {m.source && <span className="small muted">{m.source === "ai" ? t("ask_src_ai") : m.source === "rule" ? t("ask_src_rule") : m.source === "lookup" ? t("ask_src_lookup") : t("ask_src_faq")}</span>}
                 </div>
               )}
@@ -132,7 +139,7 @@ export default function Ask() {
         ))}
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); send(text); }} style={{ display: "flex", gap: 8, alignItems: "flex-end", position: "sticky", bottom: 72, background: "var(--bg)", padding: "8px 0" }}>
+      <form onSubmit={(e) => { e.preventDefault(); send(text); }} style={{ display: "flex", gap: 8, alignItems: "flex-end", position: "sticky", bottom: 92, background: "linear-gradient(to bottom, rgba(248,250,252,0), var(--bg) 30%)", padding: "14px 0 8px" }}>
         <textarea className="textarea" style={{ minHeight: 52, height: 52, flex: 1 }} rows={1} maxLength={800} placeholder={t("ask_placeholder")} value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }} />

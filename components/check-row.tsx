@@ -5,6 +5,7 @@ import { useApp } from "@/lib/app-state";
 import { timeAgo } from "@/components/app-shell";
 import { stockLabel } from "@/lib/stocks";
 import type { CheckResult } from "@/lib/types";
+import { IoChevronForward } from "react-icons/io5";
 
 export function CheckRow({ c }: { c: CheckResult }) {
   const { b, t, lang } = useApp();
@@ -16,10 +17,11 @@ export function CheckRow({ c }: { c: CheckResult }) {
     <Link href={`/result/${c.id}`} className="list-item">
       <span className={`cdot cdot-${v}`} aria-hidden />
       <span style={{ flex: 1, minWidth: 0 }}>
-        <b style={{ display: "block" }}>{c.input.side === "BUY" ? t("buy") : t("sell")} · {name}</b>
+        <b style={{ display: "block", fontWeight: 700 }}>{c.input.side === "BUY" ? t("buy") : t("sell")} · {name}</b>
         <span className="small muted">{label} · {timeAgo(c.createdAt, lang)}</span>
       </span>
       {dec && <span className="pill pill-gray">{dec}</span>}
+      <IoChevronForward className="chev" aria-hidden />
     </Link>
   );
 }

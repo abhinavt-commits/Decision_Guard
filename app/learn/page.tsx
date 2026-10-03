@@ -8,6 +8,7 @@ import { AlertCard, GovtMeasures, useAlerts } from "@/components/alerts";
 import { GLOSSARY, HELP_LINKS, SCAMS } from "@/lib/glossary";
 import type { AlertTopic } from "@/lib/alerts-shared";
 import { TOPIC_INFO } from "@/lib/alerts-shared";
+import { IoBookOutline, IoCallOutline, IoChevronForward, IoSearch, IoShieldOutline, IoWarningOutline } from "react-icons/io5";
 
 type Tab = "alerts" | "scams" | "words";
 
@@ -19,7 +20,7 @@ function Alerts() {
   const topics = Array.from(new Set((feed?.items ?? []).map((a) => a.topic)));
   return (
     <>
-      <p className="muted small">{t("alerts_sub")}</p>
+      <p className="muted small" style={{ marginTop: 16 }}>{t("alerts_sub")}</p>
       <h2>{t("alerts_govt")}</h2>
       <GovtMeasures />
 
@@ -49,17 +50,17 @@ function LearnInner() {
   return (
     <>
       <h1>{t("learn_title")}</h1>
-      <div className="seg" role="tablist" style={{ marginBottom: 8 }}>
-        <button role="tab" aria-pressed={tab === "alerts"} onClick={() => setTab("alerts")} style={{ fontSize: 16 }}>⚠️ {t("tab_alerts")}</button>
-        <button role="tab" aria-pressed={tab === "scams"} onClick={() => setTab("scams")} style={{ fontSize: 16 }}>{t("learn_scams")}</button>
-        <button role="tab" aria-pressed={tab === "words"} onClick={() => setTab("words")} style={{ fontSize: 16 }}>{t("tab_words")}</button>
+      <div className="seg" role="tablist" style={{ margin: "14px 0 8px" }}>
+        <button role="tab" aria-pressed={tab === "alerts"} onClick={() => setTab("alerts")} style={{ fontSize: 15 }}><IoWarningOutline /> {t("tab_alerts")}</button>
+        <button role="tab" aria-pressed={tab === "scams"} onClick={() => setTab("scams")} style={{ fontSize: 15 }}><IoShieldOutline /> {t("learn_scams")}</button>
+        <button role="tab" aria-pressed={tab === "words"} onClick={() => setTab("words")} style={{ fontSize: 15 }}><IoBookOutline /> {t("tab_words")}</button>
       </div>
 
       {tab === "alerts" && <Alerts />}
 
       {tab === "scams" && SCAMS.map((s) => (
-        <details key={s.id} className="card">
-          <summary style={{ fontWeight: 800, cursor: "pointer", fontSize: 18 }}>{b(s.title)}</summary>
+        <details key={s.id} className="card" style={{ marginTop: s === SCAMS[0] ? 16 : 0 }}>
+          <summary style={{ fontWeight: 700, cursor: "pointer", fontSize: 16.5, color: "var(--ink)" }}>{b(s.title)}</summary>
           <p style={{ marginTop: 10 }}><b>{t("how_it_works")}:</b> {b(s.how)}</p>
           <p style={{ margin: 0 }}><b>{t("how_to_spot")}:</b> {b(s.spot)}</p>
         </details>
@@ -67,11 +68,11 @@ function LearnInner() {
 
       {tab === "words" && (
         <>
-          <input className="input" placeholder="🔍" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search" />
+          <div className="search-wrap" style={{ marginTop: 16 }}><IoSearch /><input className="input" placeholder={lang === "hi" ? "शब्द खोजें" : "Search a word"} value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search" /></div>
           <div style={{ marginTop: 10 }}>
             {terms.map((g) => (
               <details key={g.id} className="card" id={g.id}>
-                <summary style={{ fontWeight: 800, cursor: "pointer", fontSize: 18 }}>{b(g.word)}</summary>
+                <summary style={{ fontWeight: 700, cursor: "pointer", fontSize: 16.5, color: "var(--ink)" }}>{b(g.word)}</summary>
                 <p style={{ marginTop: 10 }}>{b(g.simple)}</p>
                 {g.example && <p className="alert alert-info" style={{ margin: 0 }}>{b(g.example)}</p>}
               </details>
@@ -81,10 +82,12 @@ function LearnInner() {
       )}
 
       <h2>{t("help_title")}</h2>
-      <div className="card" style={{ paddingTop: 4, paddingBottom: 4 }}>
+      <div className="card" style={{ paddingTop: 2, paddingBottom: 2 }}>
         {HELP_LINKS.map((h) => (
           <a key={h.href} className="list-item" href={h.href} target={h.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">
-            <span style={{ flex: 1, fontWeight: 700, color: "var(--blue)" }}>{b(h.label)}</span>
+            <span className="ibadge" style={{ width: 34, height: 34, borderRadius: 10 }}><IoCallOutline /></span>
+            <span style={{ flex: 1, fontWeight: 650, color: "var(--ink)" }}>{b(h.label)}</span>
+            <IoChevronForward className="chev" aria-hidden />
           </a>
         ))}
       </div>

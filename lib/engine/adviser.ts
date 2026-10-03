@@ -142,10 +142,10 @@ export function adviserChatAnswer(l: AdviserLookup, lang: "en" | "hi"): string {
   const { signals, notChecked } = adviserSignals(l, true);
   const parts: string[] = [];
   for (const s of signals) {
-    parts.push(`${s.level === "info" ? "ℹ️" : "⚠️"} ${s.title[lang]}`);
+    parts.push(s.title[lang]);
     if (s.evidence?.length) parts.push(s.evidence.map((e) => "• " + e[lang]).join("\n"));
     parts.push(s.why[lang]);
   }
-  for (const n of notChecked) parts.push("ℹ️ " + n[lang]);
+  for (const n of notChecked) parts.push(n[lang]);
   return parts.join("\n\n");
 }

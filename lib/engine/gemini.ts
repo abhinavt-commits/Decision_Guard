@@ -18,7 +18,10 @@ const QUOTA_FALLBACK = ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "ge
 let workingModel: string | null = null;
 
 
-export const geminiEnabled = () => Boolean(process.env.GEMINI_API_KEY);
+// Pasted keys often carry spaces, quotes or "GEMINI_API_KEY=" — clean them so the key still works.
+export const geminiKey = () =>
+  (process.env.GEMINI_API_KEY ?? "").trim().replace(/^GEMINI_API_KEY\s*=\s*/i, "").replace(/^["']|["']$/g, "").trim();
+export const geminiEnabled = () => Boolean(geminiKey());
 
 /** Low-level request with model fallback and clear error logs in the terminal. */
 export async function generate(body: Record<string, unknown>, timeoutMs: number, label: string): Promise<{ text: string | null; error?: string; sources?: { title: string; url: string }[] }> {
@@ -33,7 +36,7 @@ export async function generate(body: Record<string, unknown>, timeoutMs: number,
     const remaining = timeoutMs - (Date.now() - started);
     if (remaining < 4000) { lastError = quotaHit ? "quota" : "timeout"; break; }
     try {
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(geminiKey())}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

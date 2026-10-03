@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useApp } from "@/lib/app-state";
 import { AppPage, timeAgo, useToast } from "@/components/app-shell";
-import { IconCamera, IconClock, IconMic, IconPlus } from "@/components/icons";
 import { stockLabel } from "@/lib/stocks";
 import { CheckRow } from "@/components/check-row";
 import { AlertCard, useAlerts } from "@/components/alerts";
+import {
+  IoAdd, IoCameraOutline, IoHappyOutline, IoHourglassOutline, IoMicOutline, IoRemoveCircleOutline,
+  IoSadOutline, IoShieldCheckmarkOutline, IoWarningOutline, IoChevronForward,
+} from "react-icons/io5";
 
 function useNow(ms = 1000) {
   const [now, setNow] = useState(() => Date.now());
@@ -35,22 +38,31 @@ export default function Home() {
     const s = Math.floor((ms % 60000) / 1000);
     return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}:${String(s).padStart(2, "0")}`;
   };
+  const FEEL = {
+    glad: { icon: <IoHappyOutline />, label: t("followup_glad") },
+    neutral: { icon: <IoRemoveCircleOutline />, label: t("followup_neutral") },
+    regret: { icon: <IoSadOutline />, label: t("followup_regret") },
+  };
 
   return (
     <AppPage>
-      <p className="muted" style={{ margin: "2px 0 8px" }}>{t("hello")}, {firstName} 🙏</p>
-      <section className="card hero">
+      <p className="muted" style={{ margin: "0 0 14px", fontSize: 16 }}>
+        {t("hello")}, <b style={{ fontWeight: 700 }}>{firstName}</b>
+      </p>
+
+      <section className="hero">
+        <span className="hero-badge"><IoShieldCheckmarkOutline size={14} /> {t("hero_badge")}</span>
         <h1>{t("home_ask")}</h1>
         <p>{t("home_ask_sub")}</p>
-        <Link href="/check" className="btn btn-white" style={{ marginTop: 6 }}>
-          <IconPlus /> {t("check_btn")}
+        <Link href="/check" className="btn btn-primary btn-pill">
+          <IoAdd /> {t("check_btn")}
         </Link>
         <div className="row" style={{ marginTop: 10 }}>
-          <Link href="/check?mode=screenshot" className="btn btn-sm" style={{ background: "rgba(255,255,255,.15)", color: "#fff", width: "100%" }}>
-            <IconCamera /> {t("upload_btn")}
+          <Link href="/check?mode=screenshot" className="btn btn-soft btn-sm" style={{ width: "100%" }}>
+            <IoCameraOutline /> {t("upload_btn")}
           </Link>
-          <Link href="/check?mode=voice" className="btn btn-sm" style={{ background: "rgba(255,255,255,.15)", color: "#fff", width: "100%" }}>
-            <IconMic /> {t("speak_btn")}
+          <Link href="/check?mode=voice" className="btn btn-soft btn-sm" style={{ width: "100%" }}>
+            <IoMicOutline /> {t("speak_btn")}
           </Link>
         </div>
       </section>
@@ -59,20 +71,20 @@ export default function Home() {
         const left = +new Date(c.waitUntil!) - now;
         const stockName = b(stockLabel(c.input.symbol, c.input.stockName, c.input.otherName));
         return (
-          <section key={c.id} className="card" style={{ borderColor: "var(--orange-line)" }}>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <IconClock size={28} />
-              <div style={{ flex: 1 }}>
+          <section key={c.id} className="card">
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <span className="ibadge ibadge-orange"><IoHourglassOutline /></span>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <b>{t("waiting_title")}</b>
                 <div className="small muted">{stockName}</div>
               </div>
               {left > 0 ? (
-                <div className="stat"><b style={{ fontSize: 24 }}>{fmtLeft(left)}</b><span className="small muted">{t("waiting_left")}</span></div>
+                <div className="stat"><b style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{fmtLeft(left)}</b><span className="small">{t("waiting_left")}</span></div>
               ) : null}
             </div>
             {left <= 0 && (
               <>
-                <p className="alert alert-info" style={{ marginTop: 10 }}>{t("waiting_done")}</p>
+                <p className="alert alert-info" style={{ marginTop: 12 }}>{t("waiting_done")}</p>
                 <Link href={`/result/${c.id}`} className="btn btn-outline btn-sm" style={{ width: "100%" }}>{t("open_result")}</Link>
               </>
             )}
@@ -83,16 +95,18 @@ export default function Home() {
       {followUps.map((c) => {
         const stockName = b(stockLabel(c.input.symbol, c.input.stockName, c.input.otherName));
         return (
-          <section key={c.id} className="card" style={{ borderColor: "var(--blue)" }}>
+          <section key={c.id} className="card">
             <h3>{t("followup_title")}</h3>
             <p className="small muted">{t("followup_sub")}</p>
-            <p><span className={`cdot cdot-${c.verdict}`} style={{ display: "inline-block", verticalAlign: "middle", marginRight: 6 }} />
-              <b>{c.input.side === "BUY" ? t("buy") : t("sell")} · {stockName}</b> · {timeAgo(c.createdAt, lang)}</p>
+            <p style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span className={`cdot cdot-${c.verdict}`} />
+              <span><b>{c.input.side === "BUY" ? t("buy") : t("sell")} · {stockName}</b> <span className="muted small">· {timeAgo(c.createdAt, lang)}</span></span>
+            </p>
             <div className="stack">
               {(["glad", "neutral", "regret"] as const).map((f) => (
-                <button key={f} className="btn btn-outline btn-sm" style={{ width: "100%" }}
+                <button key={f} className="btn btn-outline btn-sm" style={{ width: "100%", justifyContent: "flex-start" }}
                   onClick={() => { updateCheck(c.id, { followUp: { at: new Date().toISOString(), feeling: f } }); toast.show(t("followup_thanks")); }}>
-                  {f === "glad" ? "🙂 " + t("followup_glad") : f === "neutral" ? "😐 " + t("followup_neutral") : "😟 " + t("followup_regret")}
+                  {FEEL[f].icon} {FEEL[f].label}
                 </button>
               ))}
             </div>
@@ -101,25 +115,31 @@ export default function Home() {
       })}
 
       {paused > 0 && (
-        <section className="card" style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div className="stat"><b>{paused}</b></div>
-          <div>{t("paused_count")} 👏</div>
+        <section className="panel" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <span className="ibadge ibadge-green"><IoShieldCheckmarkOutline /></span>
+          <div style={{ flex: 1 }}>
+            <b style={{ fontSize: 22, display: "block", lineHeight: 1.1 }}>{paused}</b>
+            <span className="small muted">{t("paused_count")}</span>
+          </div>
         </section>
       )}
 
       {latestAlert && (
         <section>
-          <h2 style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span>⚠️ {t("home_alert_title")}</span>
-            <Link href="/learn?tab=alerts" className="linkbtn" style={{ fontSize: 15 }}>{t("home_alert_more")}</Link>
-          </h2>
+          <div className="h-row" style={{ margin: "32px 0 12px" }}>
+            <h2 className="h-icon"><IoWarningOutline style={{ color: "var(--orange)" }} /> {t("home_alert_title")}</h2>
+            <Link href="/learn?tab=alerts" className="linkbtn">{t("home_alert_more")} <IoChevronForward /></Link>
+          </div>
           <AlertCard a={latestAlert} compact />
         </section>
       )}
 
-      <h2>{t("recent_checks")}</h2>
-      <section className="card" style={{ paddingTop: 4, paddingBottom: 4 }}>
-        {checks.length === 0 ? <p className="muted" style={{ padding: "12px 0" }}>{t("no_checks")}</p> : checks.slice(0, 4).map((c) => <CheckRow key={c.id} c={c} />)}
+      <div className="h-row" style={{ margin: "32px 0 12px" }}>
+        <h2>{t("recent_checks")}</h2>
+        {checks.length > 4 && <Link href="/history" className="linkbtn">{t("see_all")} <IoChevronForward /></Link>}
+      </div>
+      <section className="card" style={{ paddingTop: 2, paddingBottom: 2 }}>
+        {checks.length === 0 ? <p className="muted" style={{ padding: "14px 0", margin: 0 }}>{t("no_checks")}</p> : checks.slice(0, 4).map((c) => <CheckRow key={c.id} c={c} />)}
       </section>
       {toast.node}
     </AppPage>

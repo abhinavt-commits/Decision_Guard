@@ -6,10 +6,11 @@ import { lsGet, lsSet, useApp } from "@/lib/app-state";
 import { APP_NAME, APP_SHORT } from "@/lib/ui-strings";
 import { LangToggle } from "@/components/app-shell";
 import { IconShield } from "@/components/icons";
+import { IoCheckmarkCircle, IoChevronForward, IoCopyOutline, IoPersonAddOutline, IoShieldCheckmarkOutline, IoTrendingDown, IoTrendingUp } from "react-icons/io5";
 
 const DEMOS = [
-  { u: "demo-loss", p: "loss123", en: "Ramesh — recent losses", hi: "रमेश — हाल में नुकसान", color: "var(--red-line)" },
-  { u: "demo-profit", p: "profit123", en: "Sunita — recent profits", hi: "सुनीता — हाल में मुनाफ़ा", color: "#2fb36a" },
+  { u: "demo-loss", p: "loss123", en: "Ramesh — recent losses", hi: "रमेश — हाल में नुकसान", tone: "red" as const },
+  { u: "demo-profit", p: "profit123", en: "Sunita — recent profits", hi: "सुनीता — हाल में मुनाफ़ा", tone: "green" as const },
 ];
 
 export default function Login() {
@@ -40,7 +41,8 @@ export default function Login() {
     try {
       const r = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: u, password: p }) });
       if (r.status === 429) throw new Error(t("slow_down"));
-      if (!r.ok) throw new Error(t("login_fail"));
+      if (r.status === 401) throw new Error(t("login_fail"));
+      if (!r.ok) throw new Error(`${t("server_problem")} (${r.status})`);
       if (!u.startsWith("demo-")) lsSet("dg_last_id", u.trim().toLowerCase());
       await refresh();
       router.replace("/home");
@@ -89,16 +91,17 @@ export default function Login() {
       <div className="shell" style={{ paddingBottom: 24 }}>
         {header}
         <main>
-          <div className="card" style={{ borderColor: "#2fb36a", borderWidth: 3 }}>
-            <h1 style={{ marginTop: 0 }}>✅ {t("signup_done_title")}</h1>
+          <div className="card" style={{ marginTop: 8 }}>
+            <span className="ibadge ibadge-green" style={{ width: 48, height: 48, borderRadius: 16, marginBottom: 12 }}><IoCheckmarkCircle style={{ width: 26, height: 26 }} /></span>
+            <h1 style={{ marginTop: 0 }}>{t("signup_done_title")}</h1>
             <p>{t("signup_done_sub")}</p>
             <div className="label">{t("your_login_id")}</div>
-            <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: 1, background: "var(--blue-2)", color: "var(--blue)", borderRadius: 14, padding: "14px 16px", textAlign: "center", wordBreak: "break-all" }}>
+            <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: 1, background: "var(--blue-2)", color: "var(--blue)", borderRadius: 16, padding: "16px", textAlign: "center", wordBreak: "break-all", border: "1px dashed #b9cbfa" }}>
               {created.id}
             </div>
             <button className="btn btn-outline btn-sm" style={{ width: "100%", marginTop: 10 }}
               onClick={async () => { try { await navigator.clipboard.writeText(created.id); setCopied(true); } catch { /* ignore */ } }}>
-              {copied ? "✓ " + t("copied") : t("copy_id")}
+              {copied ? <><IoCheckmarkCircle /> {t("copied")}</> : <><IoCopyOutline /> {t("copy_id")}</>}
             </button>
             <p className="alert alert-warn small" style={{ marginTop: 12 }}>{t("signup_write_down")}</p>
             <button className="btn btn-primary" style={{ marginTop: 6 }} onClick={async () => { await refresh(); router.replace("/home"); }}>{t("continue")}</button>
@@ -114,7 +117,7 @@ export default function Login() {
       <div className="shell" style={{ paddingBottom: 24 }}>
         {header}
         <main>
-          <form className="card" onSubmit={(e) => { e.preventDefault(); signup(); }}>
+          <form className="card" style={{ marginTop: 8 }} onSubmit={(e) => { e.preventDefault(); signup(); }}>
             <h1 style={{ marginTop: 0 }}>{t("signup_title")}</h1>
             <p className="muted">{t("signup_sub")}</p>
             <label className="label" htmlFor="n">{t("your_name")}</label>
@@ -137,34 +140,37 @@ export default function Login() {
     <div className="shell" style={{ paddingBottom: 24 }}>
       {header}
       <main>
-        <div className="card hero">
+        <div className="hero" style={{ marginTop: 4 }}>
+          <span className="hero-badge"><IoShieldCheckmarkOutline size={14} /> {t("hero_badge")}</span>
           <h1>{t("tagline")}</h1>
-          <p>{t("home_ask_sub")}</p>
+          <p style={{ marginBottom: 0 }}>{t("home_ask_sub")}</p>
         </div>
 
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>{t("demo_accounts")}</h2>
-          <div className="stack">
-            {DEMOS.map((d) => (
-              <button key={d.u} className="btn btn-outline" disabled={busy} onClick={() => login(d.u, d.p)} style={{ justifyContent: "flex-start", textAlign: "left" }}>
-                <span className="cdot" style={{ background: d.color }} />
-                <span style={{ flex: 1 }}>
-                  {lang === "hi" ? d.hi : d.en}
-                  <span className="small muted" style={{ display: "block", fontWeight: 500 }}>{d.u} / {d.p}</span>
-                </span>
-              </button>
-            ))}
+        <p className="eyebrow" style={{ marginTop: 28 }}>{t("demo_accounts")}</p>
+        <div className="stack" style={{ marginBottom: 8 }}>
+          {DEMOS.map((d) => (
+            <button key={d.u} className="btn btn-outline" disabled={busy} onClick={() => login(d.u, d.p)} style={{ justifyContent: "flex-start", textAlign: "left", minHeight: 68, borderRadius: 18 }}>
+              <span className={`ibadge ibadge-${d.tone}`}>{d.tone === "red" ? <IoTrendingDown /> : <IoTrendingUp />}</span>
+              <span style={{ flex: 1, color: "var(--ink)" }}>
+                {lang === "hi" ? d.hi : d.en}
+                <span className="small muted" style={{ display: "block", fontWeight: 500 }}>{d.u} / {d.p}</span>
+              </span>
+              <IoChevronForward style={{ color: "var(--ink-3)" }} />
+            </button>
+          ))}
+        </div>
+
+        <div className="card" style={{ marginTop: 24, display: "flex", gap: 14, alignItems: "flex-start" }}>
+          <span className="ibadge ibadge-green"><IoPersonAddOutline /></span>
+          <div style={{ flex: 1 }}>
+            <h3>{t("new_user")}</h3>
+            <p className="small muted">{t("new_user_sub")}</p>
+            <button className="btn btn-green btn-sm" style={{ width: "100%" }} onClick={() => { setMode("signup"); setErr(null); }}>{t("create_account")}</button>
           </div>
         </div>
 
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>{t("new_user")}</h2>
-          <p className="small muted">{t("new_user_sub")}</p>
-          <button className="btn btn-green" onClick={() => { setMode("signup"); setErr(null); }}>{t("create_account")}</button>
-        </div>
-
         <form className="card" onSubmit={(e) => { e.preventDefault(); login(); }}>
-          <h2 style={{ marginTop: 0 }}>{t("login_title")}</h2>
+          <h3>{t("login_title")}</h3>
           <label className="label" htmlFor="u">{t("username")}</label>
           <input id="u" className="input" autoComplete="username" autoCapitalize="none" placeholder="arnav-7f3k" value={username} onChange={(e) => setU(e.target.value)} />
           <label className="label" htmlFor="p">{t("password")}</label>
