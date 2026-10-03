@@ -1,0 +1,20 @@
+{
+  "_note": "SEED LIST ONLY (a few real entries copied from SEBI's public registry on 2 Oct 2026). Run `npm run fetch-sebi` on a computer in India to download the full lists before deploying. The app also tries a live lookup on SEBI's website.",
+  "fetchedAt": "2026-10-02",
+  "complete": false,
+  "entries": [
+    { "reg": "INA000017523", "name": "1 Finance Private Limited", "type": "IA" },
+    { "reg": "INA000017231", "name": "21G INVESTMENT ADVISERS PRIVATE LIMITED", "type": "IA" },
+    { "reg": "INA200000365", "name": "29K INVESTMENT ADVISERS PRIVATE LTD", "type": "IA" },
+    { "reg": "INH300000211", "name": "360 ONE Capital Market Private Limited", "type": "RA" },
+    { "reg": "INH000011431", "name": "360 ONE Distribution Services Limited", "type": "RA" },
+    { "reg": "INH000020004", "name": "5 CIRCLES PRIVATE LIMITED", "type": "RA" },
+    { "reg": "INH000025188", "name": "5paisa Capital Limited", "type": "RA" },
+    { "reg": "INH000029722", "name": "72 STREET RA PRIVATE LIMITED", "type": "RA" },
+    { "reg": "INH000023913", "name": "A C Agarwal Share Brokers Private Limited", "type": "RA" },
+    { "reg": "INH000025692", "name": "A K EQUITIES PRIVATE LIMITED", "type": "RA" },
+    { "reg": "INH000015419", "name": "A&Y MARKET RESEARCH", "type": "RA" },
+    { "reg": "INH200009193", "name": "AAA PROFIT ANALYTICS PRIVATE LIMITED", "type": "RA" },
+    { "reg": "INH000013457", "name": "AAKANKSHA GUPTA", "type": "RA" }
+  ]
+}

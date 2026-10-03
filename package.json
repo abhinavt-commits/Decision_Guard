@@ -1,0 +1,44 @@
+{
+  "name": "decision-guard",
+  "version": "1.0.0",
+  "description": "SANGYAN Decision Guard \u2014 bilingual investor decision-safety check (SANGYAN Investor Resilience Hackathon)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "eval": "tsx scripts/eval.ts",
+    "fetch-sebi": "node scripts/fetch-sebi.mjs",
+    "qr": "node scripts/qr.mjs",
+    "fetch-stocks": "node scripts/fetch-stocks.mjs",
+    "test-video": "node scripts/test-video.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "next": "^16.3.8",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-icons": "^5.7.0",
+    "tailwind-merge": "^3.7.0",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.4",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18.18"
+  }
+}
