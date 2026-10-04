@@ -6,10 +6,9 @@ import { useApp } from "@/lib/app-state";
 import { AppPage, timeAgo, useToast } from "@/components/app-shell";
 import { stockLabel } from "@/lib/stocks";
 import { CheckRow } from "@/components/check-row";
-import { AlertCard, useAlerts } from "@/components/alerts";
 import {
   IoAdd, IoHappyOutline, IoHourglassOutline, IoRemoveCircleOutline,
-  IoSadOutline, IoShieldCheckmarkOutline, IoWarningOutline, IoChevronForward,
+  IoSadOutline, IoShieldCheckmarkOutline, IoChevronForward,
 } from "react-icons/io5";
 
 function useNow(ms = 1000) {
@@ -24,8 +23,6 @@ function useNow(ms = 1000) {
 export default function Home() {
   const { t, b, me, checks, updateCheck, lang } = useApp();
   const now = useNow();
-  const { feed } = useAlerts();
-  const latestAlert = feed?.items?.[0];
   const toast = useToast();
 
   const waiting = checks.filter((c) => c.decision === "waiting" && c.waitUntil);
@@ -117,15 +114,6 @@ export default function Home() {
         </section>
       )}
 
-      {latestAlert && (
-        <section>
-          <div className="h-row" style={{ margin: "32px 0 12px" }}>
-            <h2 className="h-icon"><IoWarningOutline style={{ color: "var(--orange)" }} /> {t("home_alert_title")}</h2>
-            <Link href="/learn?tab=alerts" className="linkbtn">{t("home_alert_more")} <IoChevronForward /></Link>
-          </div>
-          <AlertCard a={latestAlert} compact />
-        </section>
-      )}
 
       <div className="h-row" style={{ margin: "32px 0 12px" }}>
         <h2>{t("recent_checks")}</h2>
