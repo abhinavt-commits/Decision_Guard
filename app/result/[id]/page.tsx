@@ -14,7 +14,7 @@ import { AlertCard, useAlerts } from "@/components/alerts";
 import { SIGNAL_TO_TOPIC } from "@/lib/alerts-shared";
 import {
   IoAlertCircle, IoArrowForward, IoCheckmarkCircle, IoChevronDown, IoCloseCircle, IoFilmOutline, IoHandLeftOutline,
-  IoInformationCircle, IoNewspaperOutline, IoShieldCheckmarkOutline, IoSparklesOutline, IoTimeOutline, IoTrendingUpOutline, IoWarning,
+  IoInformationCircle, IoLinkOutline, IoNewspaperOutline, IoShieldCheckmarkOutline, IoSparklesOutline, IoTimeOutline, IoTrendingUpOutline, IoWarning,
 } from "react-icons/io5";
 
 const SECTION: Record<Category, UIKey> = {
@@ -208,6 +208,32 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
               {c.video.debug && <><br /><span className="small" style={{ opacity: 0.75 }}>({c.video.debug})</span></>}
             </p>
           ) : null}
+        </section>
+      )}
+
+      {c.page && (
+        <section className="card" style={{ marginTop: 16 }}>
+          <p className="eyebrow" style={{ display: "flex", alignItems: "center", gap: 6 }}><IoLinkOutline /> {t("link_inside")}</p>
+          {c.page.status === "ok" ? (
+            <>
+              {c.page.title && <b style={{ display: "block", lineHeight: 1.4 }}>{c.page.title}</b>}
+              <div className="small muted" style={{ marginTop: 2 }}>
+                {c.page.siteName || c.page.host}
+                {c.page.published ? ` · ${t("fresh_published")} ${new Date(c.page.published).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" })}` : ""}
+              </div>
+              {c.page.description && <p className="small" style={{ margin: "10px 0 0" }}>{c.page.description}</p>}
+              <p className="small muted" style={{ margin: "10px 0 0" }}>{t("link_read_note")}</p>
+            </>
+          ) : (
+            <p className="alert alert-warn small" style={{ margin: 0 }}>
+              {t("link_not_read")} <b>{c.page.reasonText ? b(c.page.reasonText) : ""}</b>
+            </p>
+          )}
+          {c.page.redirected && c.page.host && (
+            <p className="small" style={{ margin: "10px 0 0", wordBreak: "break-word" }}>
+              <b>{t("link_opens")}:</b> {c.page.host}
+            </p>
+          )}
         </section>
       )}
 

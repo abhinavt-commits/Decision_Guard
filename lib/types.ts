@@ -115,8 +115,21 @@ export interface CheckResult {
     disclaimer?: boolean;
     minutesWatched?: number;
   };
+  page?: {
+    status: "ok" | "failed";
+    reason?: string;
+    reasonText?: Bi;
+    url: string;
+    finalUrl?: string;
+    host?: string;
+    redirected?: boolean;
+    title?: string;
+    siteName?: string;
+    description?: string;
+    published?: string;
+  };
   youtube?: { title?: string; channel?: string; views?: number; published?: string };
-  freshness?: { date?: string; ageDays?: number; from: "youtube" | "link" | "message" | "user" | "none"; level: "fresh" | "weeks" | "months" | "old" | "unknown" };
+  freshness?: { date?: string; ageDays?: number; from: "youtube" | "page" | "link" | "message" | "user" | "none"; level: "fresh" | "weeks" | "months" | "old" | "unknown" };
   // user follow-up
   decision?: "went_ahead" | "skipped" | "waiting";
   waitUntil?: string;

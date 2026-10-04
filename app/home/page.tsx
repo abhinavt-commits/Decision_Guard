@@ -8,7 +8,7 @@ import { stockLabel } from "@/lib/stocks";
 import { CheckRow } from "@/components/check-row";
 import { AlertCard, useAlerts } from "@/components/alerts";
 import {
-  IoAdd, IoCameraOutline, IoHappyOutline, IoHourglassOutline, IoMicOutline, IoRemoveCircleOutline,
+  IoAdd, IoHappyOutline, IoHourglassOutline, IoRemoveCircleOutline,
   IoSadOutline, IoShieldCheckmarkOutline, IoWarningOutline, IoChevronForward,
 } from "react-icons/io5";
 
@@ -57,14 +57,7 @@ export default function Home() {
         <Link href="/check" className="btn btn-primary btn-pill">
           <IoAdd /> {t("check_btn")}
         </Link>
-        <div className="row" style={{ marginTop: 10 }}>
-          <Link href="/check?mode=screenshot" className="btn btn-soft btn-sm" style={{ width: "100%" }}>
-            <IoCameraOutline /> {t("upload_btn")}
-          </Link>
-          <Link href="/check?mode=voice" className="btn btn-soft btn-sm" style={{ width: "100%" }}>
-            <IoMicOutline /> {t("speak_btn")}
-          </Link>
-        </div>
+        <p className="small muted" style={{ margin: "12px 0 0", textAlign: "center" }}>{t("check_btn_hint")}</p>
       </section>
 
       {waiting.map((c) => {

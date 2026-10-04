@@ -10,6 +10,7 @@ import { analyseFreshness } from "./freshness";
 import { getMarketContext, marketSignals } from "./market";
 import { analyzeYoutubeVideo, geminiEnabled, readWithGemini, type VideoReading } from "./gemini";
 import { isAdviceQuestion } from "./guardrail";
+import { PAGE_FAIL, readWebPage } from "./webpage";
 
 export interface EngineOptions {
   offline?: boolean; // no network calls (tests / eval)
@@ -61,15 +62,26 @@ export async function runCheck(input: CheckInput, history: PastTrade[], opts: En
   // --- Amount -----------------------------------------------------------------
   const ytId = input.url ? youtubeId(input.url) : null;
   const ytUrl = ytId ? input.url : undefined;
-  const [market, yt, , video] = await Promise.all([
+  // Any other link (website, Telegram post, short link): open it and read the page.
+  const linkUrl = input.url && !ytId
+    ? input.url.trim()
+    : (input.message ?? "").match(/https?:\/\/[^\s<>"')]+/gi)?.find((l) => !youtubeId(l));
+  const [market, yt, page, video] = await Promise.all([
     input.symbol !== "OTHER" ? getMarketContext(input.symbol, input.lang, offline) : Promise.resolve(undefined),
     !offline && ytUrl ? fetchYoutube(ytUrl) : Promise.resolve(null),
-    Promise.resolve(null),
+    !offline && linkUrl ? readWebPage(linkUrl) : Promise.resolve(null),
     // Actually watch the video (Gemini). Without a key: status "off".
     ytId && !offline ? analyzeYoutubeVideo(ytId) : Promise.resolve(null),
   ]);
   // AI reads the message together with the YouTube title/description (finds the speaker's name too).
-  const readable = [input.message ?? "", yt?.title ? `Video title: ${yt.title}` : "", yt?.description ? `Video description: ${yt.description}` : ""].filter(Boolean).join("\n");
+  const pageOk = page?.status === "ok" ? page : null;
+  const pageText = pageOk ? [pageOk.title, pageOk.description, pageOk.text?.slice(0, 6000)].filter(Boolean).join("\n") : "";
+  const readable = [
+    input.message ?? "",
+    yt?.title ? `Video title: ${yt.title}` : "",
+    yt?.description ? `Video description: ${yt.description}` : "",
+    pageOk ? `Linked web page (${pageOk.finalHost}):\n${pageText.slice(0, 3500)}` : "",
+  ].filter(Boolean).join("\n");
   const ai = !offline && geminiEnabled() && readable.length > 30 ? await readWithGemini({ text: readable }) : null;
   // Without AI: "Parag Thakkar's view on ITC" → "Parag Thakkar"
   const titleSpeaker = yt?.title?.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+){1,2})(?:'s|’s|\s(?:on|says|explains|bets|bullish|bearish))\b/)?.[1];
@@ -80,6 +92,8 @@ export async function runCheck(input: CheckInput, history: PastTrade[], opts: En
   const textParts = [input.message ?? ""];
   if (yt?.title) textParts.push(yt.title);
   if (yt?.description) textParts.push(yt.description);
+  if (pageText) textParts.push(pageText);
+  if (page?.redirected && page.finalUrl) textParts.push(`Link opens: ${page.finalUrl}`);
   if (ai?.claims?.length) textParts.push(ai.claims.map((c) => c.quote).join("\n"));
   const videoOk = video?.status === "ok" ? video : null;
   if (videoOk) {
@@ -121,6 +135,13 @@ export async function runCheck(input: CheckInput, history: PastTrade[], opts: En
       hi: "सलाह ख़ुद: कोई मैसेज, स्क्रीनशॉट या लिंक नहीं दिया गया, इसलिए हम यह नहीं पढ़ पाए कि क्या वादा किया गया।",
     });
   }
+  if (page && page.status !== "ok" && page.reason !== "app_download") {
+    const why = PAGE_FAIL[page.reason ?? "network"];
+    notChecked.push({
+      en: `What the linked page says: ${why.en} Paste the key lines or add a screenshot to check them too.`,
+      hi: `लिंक वाले पेज में क्या लिखा है: ${why.hi} मुख्य बातें पेस्ट करें या स्क्रीनशॉट डालें ताकि उन्हें भी जाँच सकें।`,
+    });
+  }
   if (ytUrl && !yt) {
     notChecked.push({ en: "YouTube video details could not be loaded.", hi: "YouTube वीडियो की जानकारी लोड नहीं हो पाई।" });
   }
@@ -136,6 +157,18 @@ export async function runCheck(input: CheckInput, history: PastTrade[], opts: En
   const views = input.views || yt?.views;
   const src = analyseSource({ ...input, views }, fullText, yt?.channel);
   signals.push(...src.signals);
+  if (page?.reason === "app_download" && !signals.some((x) => x.id === "apk_link")) {
+    signals.push({
+      id: "apk_link", level: "red", category: "source",
+      title: { en: "Link downloads an app file instead of opening a page", hi: "लिंक पेज खोलने की जगह ऐप फ़ाइल डाउनलोड करता है" },
+      why: {
+        en: "Apps from outside the Play Store can steal data or show fake profits. Install trading apps only from the official store.",
+        hi: "Play Store के बाहर से आए ऐप डेटा चुरा सकते हैं या नकली मुनाफ़ा दिखा सकते हैं। ट्रेडिंग ऐप सिर्फ़ आधिकारिक स्टोर से इंस्टॉल करें।",
+      },
+      evidence: [{ en: `Opens: ${page.finalUrl ?? page.url}`, hi: `खुलता है: ${page.finalUrl ?? page.url}` }],
+      term: "fake_app",
+    });
+  }
   // If the only payment details are SEBI-validated @valid UPI IDs, a payment mention is not a warning.
   const upis = extractUpiIds(fullText);
   if (upis.length && upis.every(isValidSebiUpi)) {
@@ -172,7 +205,7 @@ export async function runCheck(input: CheckInput, history: PastTrade[], opts: En
   notChecked.push(...mk.notChecked);
 
   // --- How old is the tip? ----------------------------------------------------------
-  const fresh = analyseFreshness({ input, text: fullText, youtubePublished: yt?.published, market, urgency: claims.matchedIds.includes("urgency"), now: opts.now });
+  const fresh = analyseFreshness({ input, text: fullText, youtubePublished: yt?.published, pagePublished: pageOk?.published, market, urgency: claims.matchedIds.includes("urgency"), now: opts.now });
   signals.push(...fresh.signals);
   notChecked.push(...fresh.notChecked);
   if (market) delete market._series; // big array, not needed on the phone
@@ -225,6 +258,7 @@ export async function runCheck(input: CheckInput, history: PastTrade[], opts: En
     aiUsed: Boolean(ai || videoOk),
     video: video ? { status: video.status, reason: video.reason, reasonText: video.status !== "ok" ? VIDEO_FAIL[video.reason ?? "unknown"] ?? VIDEO_FAIL.unknown : undefined, debug: video.debug, speaker: video.speaker, claims: video.claims, regNumbers: video.regNumbers, links: video.links, disclaimer: video.disclaimer, minutesWatched: video.minutesWatched, id: ytId ?? undefined } : undefined,
     freshness: fresh.freshness,
+    page: page ? { status: page.status, reason: page.reason, reasonText: page.status !== "ok" ? PAGE_FAIL[page.reason ?? "network"] : undefined, url: page.url, finalUrl: page.finalUrl, host: page.finalHost ?? page.host, redirected: page.redirected, title: pageOk?.title, siteName: pageOk?.siteName, description: pageOk?.description?.slice(0, 300), published: pageOk?.published } : undefined,
     youtube: yt ? { title: yt.title, channel: yt.channel, views: yt.views, published: yt.published } : undefined,
     aiSummary: videoOk?.summary ?? ai?.summary,
   };

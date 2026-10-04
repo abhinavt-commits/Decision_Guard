@@ -1,8 +1,8 @@
 // All interface text. Simple, everyday Hindi — not formal financial Hindi.
 // To rename the app, change APP_NAME only.
 
-export const APP_NAME = { en: "SANGYAN Decision Guard", hi: "संज्ञान डिसीज़न गार्ड" };
-export const APP_SHORT = { en: "SANGYAN", hi: "संज्ञान" };
+export const APP_NAME = { en: "Decision Guard", hi: "डिसीज़न गार्ड" };
+export const APP_SHORT = { en: "Decision Guard", hi: "डिसीज़न गार्ड" };
 
 const en = {
   tagline: "Before you act, let's check.",
@@ -73,6 +73,7 @@ const en = {
   ask_src_lookup: "SEBI registry search",
   hello: "Namaste",
   hero_badge: "2-minute safety check",
+  check_btn_hint: "Paste a message, add a link or screenshot, or speak — all on the next screen.",
   see_all: "See all",
   paused_title: "Pauses before acting",
   home_ask: "Thinking of buying or selling a share?",
@@ -176,6 +177,10 @@ const en = {
   source_name_ph: "e.g. person's name or channel name",
   source_name_help: "We'll look this name up in SEBI's lists of registered advisers and analysts.",
   video_inside: "Inside the video",
+  link_inside: "What the link shows",
+  link_opens: "This link actually opens",
+  link_read_note: "We opened the page and checked its text with the same rules as a message.",
+  link_not_read: "We could not read this page:",
   video_watched_all: "AI watched the video (speech + on-screen text)",
   video_not_watched_short: "We could not watch inside this video, so only its title and description were checked. Reason:",
   video_quota_tip: "Tip: the free AI plan allows a limited amount of video per minute and per day. Wait a minute and check again — the same video is remembered once it works.",
@@ -257,7 +262,7 @@ const en = {
   ai_on: "AI reading: on",
   ai_off: "AI reading: off (rules only)",
   install_app: "Add to home screen",
-  wa_share_text: "I checked this tip with SANGYAN Decision Guard before acting:",
+  wa_share_text: "I checked this tip with Decision Guard before acting:",
   open_result: "Open",
   decision_went: "Went ahead",
   decision_skipped: "Skipped",
@@ -343,6 +348,7 @@ const hi: Record<UIKey, string> = {
   ask_src_lookup: "SEBI सूची में खोज",
   hello: "नमस्ते",
   hero_badge: "2 मिनट की सुरक्षा जाँच",
+  check_btn_hint: "मैसेज पेस्ट करें, लिंक या स्क्रीनशॉट डालें, या बोलकर बताएँ — सब अगली स्क्रीन पर।",
   see_all: "सभी देखें",
   paused_title: "कुछ करने से पहले रुके",
   home_ask: "कोई शेयर ख़रीदने या बेचने की सोच रहे हैं?",
@@ -446,6 +452,10 @@ const hi: Record<UIKey, string> = {
   source_name_ph: "जैसे: व्यक्ति या चैनल का नाम",
   source_name_help: "हम यह नाम SEBI के रजिस्टर्ड एडवाइज़र और एनालिस्ट की सूची में खोजेंगे।",
   video_inside: "वीडियो के अंदर",
+  link_inside: "लिंक में क्या है",
+  link_opens: "यह लिंक असल में खुलता है",
+  link_read_note: "हमने पेज खोलकर उसका टेक्स्ट उन्हीं नियमों से जाँचा जैसे मैसेज को।",
+  link_not_read: "यह पेज नहीं पढ़ पाए:",
   video_watched_all: "AI ने वीडियो देखा (बोली गई बातें + स्क्रीन पर लिखा)",
   video_not_watched_short: "हम इस वीडियो के अंदर नहीं देख पाए, इसलिए सिर्फ़ टाइटल और विवरण जाँचे गए। वजह:",
   video_quota_tip: "सुझाव: मुफ़्त AI प्लान में हर मिनट और हर दिन सीमित वीडियो देखे जा सकते हैं। एक मिनट रुककर फिर जाँचें — एक बार सफल होने पर वही वीडियो याद रहता है।",
@@ -527,7 +537,7 @@ const hi: Record<UIKey, string> = {
   ai_on: "AI से पढ़ना: चालू",
   ai_off: "AI से पढ़ना: बंद (सिर्फ़ नियम)",
   install_app: "होम स्क्रीन पर जोड़ें",
-  wa_share_text: "कुछ करने से पहले मैंने यह टिप संज्ञान डिसीज़न गार्ड से जाँची:",
+  wa_share_text: "कुछ करने से पहले मैंने यह टिप डिसीज़न गार्ड से जाँची:",
   open_result: "खोलें",
   decision_went: "आगे बढ़े",
   decision_skipped: "छोड़ दिया",

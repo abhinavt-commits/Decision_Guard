@@ -55,6 +55,7 @@ export function analyseFreshness(opts: {
   input: CheckInput;
   text: string;
   youtubePublished?: string;
+  pagePublished?: string;
   market?: MarketContext;
   urgency: boolean;
   now?: number;
@@ -67,6 +68,7 @@ export function analyseFreshness(opts: {
   let date: Date | null = null;
   let from: NonNullable<CheckResult["freshness"]>["from"] = "none";
   if (opts.youtubePublished && !isNaN(+new Date(opts.youtubePublished))) { date = new Date(opts.youtubePublished); from = "youtube"; }
+  else if (opts.pagePublished && !isNaN(+new Date(opts.pagePublished)) && +new Date(opts.pagePublished) <= now) { date = new Date(opts.pagePublished); from = "page"; }
   else {
     const d = detectDate(opts.text, input.url, now);
     if (d) { date = d.date; from = d.from; }
@@ -78,6 +80,7 @@ export function analyseFreshness(opts: {
   const FROM: Record<string, Bi> = {
     youtube: { en: "YouTube upload date", hi: "YouTube पर अपलोड की तारीख़" },
     link: { en: "date in the link", hi: "लिंक में लिखी तारीख़" },
+    page: { en: "web page publish date", hi: "वेब पेज के प्रकाशन की तारीख़" },
     message: { en: "date written in the message", hi: "मैसेज में लिखी तारीख़" },
   };
 
